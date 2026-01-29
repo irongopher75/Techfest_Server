@@ -27,7 +27,6 @@ app.get('/', (req, res) => {
 // Import Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
-app.use('/api/payments', require('./routes/payments'));
 app.use('/api/registrations', require('./routes/registrations'));
 
 app.listen(PORT, () => {

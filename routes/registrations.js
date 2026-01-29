@@ -17,10 +17,24 @@ router.get('/my', auth, async (req, res) => {
     }
 });
 
+// @route   GET api/registrations/upi-details
+// @desc    Get UPI ID for payment
+router.get('/upi-details', auth, (req, res) => {
+    res.json({
+        upiId: process.env.ADMIN_UPI_ID || 'vishnurocky49@okhdfcbank',
+        merchantName: 'Techfest'
+    });
+});
+
 // @route   POST api/registrations/manual-upi
 // @desc    Submit a manual UPI payment for verification
 router.post('/manual-upi', auth, async (req, res) => {
     const { eventId, transactionId, amountPaid } = req.body;
+
+    if (!transactionId) {
+        return res.status(400).json({ message: 'Transaction ID (UTR) is required' });
+    }
+
     try {
         const registration = new Registration({
             user: req.user.id,
@@ -31,7 +45,11 @@ router.post('/manual-upi', auth, async (req, res) => {
             status: 'pending_verification'
         });
         await registration.save();
-        res.json({ message: 'Registration submitted for verification', registration });
+        res.json({
+            message: 'Registration submitted for verification. Please wait for admin approval.',
+            registration,
+            upiUsed: process.env.ADMIN_UPI_ID || 'vishnurocky49@okhdfcbank'
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
