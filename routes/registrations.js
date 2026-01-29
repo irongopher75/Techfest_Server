@@ -26,6 +26,40 @@ router.get('/upi-details', auth, (req, res) => {
     });
 });
 
+// @route   POST api/registrations/register
+// @desc    Simplified registration for an event
+router.post('/register', auth, async (req, res) => {
+    const { eventId } = req.body;
+
+    try {
+        // Check if already registered
+        let registration = await Registration.findOne({
+            user: req.user.id,
+            event: eventId
+        });
+
+        if (registration) {
+            return res.status(400).json({ message: 'You are already registered for this event' });
+        }
+
+        registration = new Registration({
+            user: req.user.id,
+            event: eventId,
+            status: 'registered',
+            paymentMethod: 'none'
+        });
+
+        await registration.save();
+        res.json({
+            message: 'Registration successful!',
+            registration
+        });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route   POST api/registrations/manual-upi
 // @desc    Submit a manual UPI payment for verification
 router.post('/manual-upi', auth, async (req, res) => {
