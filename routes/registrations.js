@@ -10,6 +10,7 @@ router.get('/my', auth, async (req, res) => {
     try {
         const registrations = await Registration.find({ user: req.user.id })
             .populate('event')
+            .populate('teamMembers', 'name username email')
             .sort({ createdAt: -1 });
         res.json(registrations);
     } catch (err) {
@@ -30,8 +31,9 @@ router.get('/all', auth, eventAdmin, async (req, res) => {
         }
 
         const registrations = await Registration.find(query)
-            .populate('user', 'name email college')
-            .populate('event', 'title category fee date')
+            .populate('user', 'name email college username')
+            .populate('event', 'title category fee date eventType maxTeamSize')
+            .populate('teamMembers', 'name username email college')
             .sort({ createdAt: -1 });
 
         res.json(registrations);
@@ -53,34 +55,36 @@ router.get('/upi-details', auth, (req, res) => {
 // @route   POST api/registrations/register
 // @desc    Simplified registration for an event
 router.post('/register', auth, async (req, res) => {
-    const { eventId } = req.body;
+    const { eventId, teamName, teamMembers } = req.body;
     console.log(`Registration attempt: User ${req.user.id} for Event ${eventId}`);
 
     try {
-        // Check if already registered
-        let registration = await Registration.findOne({
-            user: req.user.id,
-            event: eventId
+        // Check if already registered (for group, check if any member is already registered)
+        const existingRegs = await Registration.find({
+            event: eventId,
+            $or: [
+                { user: req.user.id },
+                { teamMembers: req.user.id },
+                ...(teamMembers ? [{ user: { $in: teamMembers } }] : []),
+                ...(teamMembers ? [{ teamMembers: { $in: teamMembers } }] : [])
+            ]
         });
 
-        if (registration) {
-            console.log(`User ${req.user.id} is already registered for event ${eventId}`);
-            return res.status(400).json({ message: 'You are already registered for this event' });
+        if (existingRegs.length > 0) {
+            return res.status(400).json({ message: 'One or more members are already registered for this event' });
         }
 
-        registration = new Registration({
+        const registration = new Registration({
             user: req.user.id,
             event: eventId,
+            teamName,
+            teamMembers,
             status: 'registered',
             paymentMethod: 'none'
         });
 
         await registration.save();
-        console.log(`Registration successful for User ${req.user.id} and Event ${eventId}`);
-        res.json({
-            message: 'Registration successful!',
-            registration
-        });
+        res.json({ message: 'Registration successful!', registration });
     } catch (err) {
         console.error('Registration Route Error:', err);
         res.status(500).json({ message: 'Server error during registration', error: err.message });
@@ -90,7 +94,7 @@ router.post('/register', auth, async (req, res) => {
 // @route   POST api/registrations/manual-upi
 // @desc    Submit a manual UPI payment for verification
 router.post('/manual-upi', auth, async (req, res) => {
-    const { eventId, transactionId, amountPaid } = req.body;
+    const { eventId, transactionId, amountPaid, teamName, teamMembers } = req.body;
 
     if (!transactionId) {
         return res.status(400).json({ message: 'Transaction ID (UTR) is required' });
@@ -100,6 +104,8 @@ router.post('/manual-upi', auth, async (req, res) => {
         const registration = new Registration({
             user: req.user.id,
             event: eventId,
+            teamName,
+            teamMembers,
             transactionId,
             amountPaid,
             paymentMethod: 'upi_direct',

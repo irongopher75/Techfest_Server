@@ -9,13 +9,17 @@ const { superiorAdmin } = require('../middleware/adminAuth');
 // @route   POST api/auth/signup
 // @desc    Register user or admin (pending approval)
 router.post('/signup', async (req, res) => {
-    const { name, email, password, college, role } = req.body;
+    const { name, username, email, password, college, role } = req.body;
     console.log(`Registration attempt for: ${email} as ${role || 'user'}`);
 
     try {
-        let user = await User.findOne({ email });
+        let user = await User.findOne({
+            $or: [{ email }, { username }]
+        });
+
         if (user) {
-            return res.status(400).json({ message: 'Account already exists for this email' });
+            const field = user.email === email ? 'Email' : 'Username';
+            return res.status(400).json({ message: `${field} already exists` });
         }
 
         // Only allow event_admin or user from public signup. 
@@ -25,6 +29,7 @@ router.post('/signup', async (req, res) => {
 
         user = new User({
             name,
+            username,
             email,
             password,
             college,
@@ -46,6 +51,7 @@ router.post('/signup', async (req, res) => {
                 user: {
                     id: user.id,
                     name: user.name,
+                    username: user.username,
                     email: user.email,
                     role: user.role,
                     isApproved: user.isApproved
@@ -77,6 +83,7 @@ router.post('/login', async (req, res) => {
                 user: {
                     id: user.id,
                     name: user.name,
+                    username: user.username,
                     email: user.email,
                     role: user.role,
                     isApproved: user.isApproved

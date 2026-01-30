@@ -8,6 +8,8 @@ const eventSchema = new mongoose.Schema({
     date: { type: Date, required: true },
     venue: { type: String },
     maxParticipants: { type: Number },
+    eventType: { type: String, enum: ['individual', 'group'], default: 'individual' },
+    maxTeamSize: { type: Number, default: 1 },
     category: { type: String } // e.g., 'Technical', 'Cultural', 'Workshop'
 }, { timestamps: true });
 
