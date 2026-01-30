@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 router.post('/', auth, superiorAdmin, async (req, res) => {
     const { title, description, fee, date, venue, category } = req.body;
     try {
-        const newEvent = new Event({ title, description, fee, date, venue, category });
+        const newEvent = new Event({ title, description, fee, date: new Date(date), venue, category });
         const event = await newEvent.save();
         res.json(event);
     } catch (err) {
@@ -48,6 +48,21 @@ router.put('/:id', auth, eventAdmin, async (req, res) => {
         if (!event) return res.status(404).json({ message: 'Event not found' });
 
         res.json(event);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// @route   DELETE api/events/:id
+// @desc    Delete an event (Superior Admin only)
+router.delete('/:id', auth, superiorAdmin, async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+
+        await event.deleteOne();
+        res.json({ message: 'Event removed successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

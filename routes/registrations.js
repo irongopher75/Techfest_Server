@@ -117,4 +117,20 @@ router.post('/manual-upi', auth, async (req, res) => {
     }
 });
 
+// @route   POST api/registrations/verify/:id
+// @desc    Verify/Approve a registration (Superior Admin only)
+router.post('/verify/:id', auth, async (req, res) => {
+    try {
+        const registration = await Registration.findById(req.params.id);
+        if (!registration) return res.status(404).json({ message: 'Registration not found' });
+
+        registration.status = 'paid';
+        await registration.save();
+        res.json({ message: 'Registration verified successfully', registration });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;
