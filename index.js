@@ -2,10 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const dns = require('dns');
-
-dns.setServers(['8.8.8.8', '8.8.4.4']);
 dotenv.config();
+
+console.log('Server starting... MONGODB_URI is', process.env.MONGODB_URI ? 'defined' : 'MISSING');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
