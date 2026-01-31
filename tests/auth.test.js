@@ -13,7 +13,7 @@ app.use('/api/auth', authRoutes);
 describe('Auth API', () => {
     beforeAll(async () => {
         // Mock MongoDB connection or use a test DB
-        await mongoose.connect(process.env.MONGODB_URI_TEST || 'mongodb://localhost:27017/techfest_test');
+        await mongoose.connect(process.env.MONGODB_URI_TEST || 'mongodb://localhost:27017/ambiora_test');
     });
 
     afterAll(async () => {

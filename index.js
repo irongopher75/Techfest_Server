@@ -37,6 +37,9 @@ if (cluster.isPrimary) {
     const app = express();
     const PORT = process.env.PORT || 5001;
 
+    // Trust proxy for Render/Cloudflare
+    app.set('trust proxy', 1);
+
     // Security Middleware
     app.use(helmet()); // Set security HTTP headers
     app.use(mongoSanitize()); // Prevent NoSQL injection
@@ -85,7 +88,7 @@ if (cluster.isPrimary) {
 
     // Basic Route
     app.get('/', (req, res) => {
-        res.send('Techfest API is running');
+        res.send('Ambiora API is running');
     });
 
     // Import Routes

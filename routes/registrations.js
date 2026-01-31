@@ -70,7 +70,7 @@ router.get('/all', auth, eventAdmin, async (req, res) => {
 router.get('/upi-details', auth, (req, res) => {
     res.json({
         upiId: process.env.ADMIN_UPI_ID,
-        merchantName: 'Techfest'
+        merchantName: 'Ambiora'
     });
 });
 
