@@ -6,21 +6,15 @@ const User = require('./models/User');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 dotenv.config();
 
-async function check() {
-    const email = process.argv[2];
-    if (!email) {
-        console.error('Usage: node check-user.js <email>');
-        process.exit(1);
-    }
+async function listUsers() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected to MongoDB');
-        const user = await User.findOne({ email });
-        if (user) {
-            console.log('User found:', user);
-        } else {
-            console.log('User not found');
-        }
+        const users = await User.find({});
+        console.log('System Users Summary:');
+        users.forEach(u => {
+            console.log(`- Email: ${u.email}, Username: ${u.username || 'MISSING'}, Role: ${u.role}`);
+        });
         process.exit();
     } catch (err) {
         console.error('Error:', err);
@@ -28,4 +22,4 @@ async function check() {
     }
 }
 
-check();
+listUsers();

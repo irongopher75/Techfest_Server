@@ -7,9 +7,13 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 dotenv.config();
 
 async function promote() {
+    const email = process.argv[2];
+    if (!email) {
+        console.error('Usage: node promote-user.js <email>');
+        process.exit(1);
+    }
     try {
         await mongoose.connect(process.env.MONGODB_URI);
-        const email = 'vishnuupanicker01@gmail.com'; // Adjust if needed
         const user = await User.findOne({ email });
 
         if (!user) {

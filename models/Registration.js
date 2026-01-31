@@ -11,4 +11,10 @@ const registrationSchema = new mongoose.Schema({
     amountPaid: { type: Number, required: false }
 }, { timestamps: true });
 
+// Indexes for performance and data integrity
+registrationSchema.index({ user: 1 });
+registrationSchema.index({ event: 1 });
+registrationSchema.index({ status: 1 });
+registrationSchema.index({ user: 1, event: 1 }, { unique: true });
+
 module.exports = mongoose.model('Registration', registrationSchema);
