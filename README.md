@@ -66,6 +66,7 @@ For a full breakdown of every API endpoint, request body, and response format, s
 👉 [API Documentation](./API_DOCS.md)
 
 ## 🔗 Project Links
+- **GitHub Repository**: [irongopher75/Techfest_Server](https://github.com/irongopher75/Techfest_Server)
 - **Live Website**: [techfestmpstme](https://techfestmpstme.netlify.app)
 - **Live API Endpoint**: [ambiora-server.onrender.com](https://ambiora-server.onrender.com) (Verification Required)
 
